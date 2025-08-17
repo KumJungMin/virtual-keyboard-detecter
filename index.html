@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>키보드 대기 vs 즉시 실행</title>
+  <style>
+    /* 이전 답변의 CSS와 동일 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 400px; margin: 0 auto; }
+    input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 20px; }
+    button { width: 100%; padding: 15px; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 16px; transition: background-color 0.2s; }
+    button:active { transform: scale(0.98); }
+    #open-sheet-wait-button { background: #007AFF; }
+    #open-sheet-now-button { background: #34C759; }
+    .dim { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 999; }
+    .dim.show { opacity: 1; visibility: visible; }
+    #bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; height: 300px; background: white; padding: 20px; transition: transform 0.3s ease; z-index: 1000; transform: translateY(100%); border-radius: 20px 20px 0 0; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1); }
+    #bottom-sheet.up { transform: translateY(0); }
+    .status { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
+    .status h3 { margin-bottom: 10px; color: #333; }
+    .status p { color: #666; font-size: 14px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="status">
+      <h3>키보드 대기 vs 즉시 실행</h3>
+      <p>두 버튼의 차이를 경험해보세요. 파란색 버튼은 키보드가 닫힌 후 바텀시트가 열리고, 초록색 버튼은 즉시 열립니다.</p>
+    </div>
+    
+    <input type="text" placeholder="여기에 입력하여 키보드를 활성화" id="input" />
+    <button id="open-sheet-wait-button">바텀시트 열기 (키보드 대기)</button>
+    <button id="open-sheet-now-button">바텀시트 즉시 열기</button>
+  </div>
+
+  <div id="dim" class="dim"></div>
+  <div id="bottom-sheet">
+    <h3>바텀시트</h3>
+    <p>두 가지 방식 중 하나로 열렸습니다.</p>
+  </div>
+
+  <script type="module">
+    import { keyboardDetector } from './index.js';
+    
+    // --- DOM 요소 ---
+    const bottomSheet = document.getElementById('bottom-sheet');
+    const waitButton = document.getElementById('open-sheet-wait-button');
+    const nowButton = document.getElementById('open-sheet-now-button'); // 새 버튼
+    const dim = document.getElementById('dim');
+    const input = document.getElementById('input');
+
+
+    // --- 상태 플래그 ---
+    let isSheetScheduledToOpen = false;
+
+    // --- UI 제어 함수 (리팩토링) ---
+    // 순수하게 UI를 보여주는 역할
+    const showSheetUI = () => {
+      bottomSheet.classList.add('up');
+      dim.classList.add('show');
+    };
+
+    // 순수하게 UI를 숨기는 역할
+    const hideSheetUI = () => {
+      bottomSheet.classList.remove('up');
+      dim.classList.remove('show');
+    };
+
+    // --- KeyboardDetector 설정 ---
+    const detector = keyboardDetector();
+    
+    detector.on('keyboardStableClose', () => {
+      console.log('Event: keyboardClose detected.');
+      // 예약된 작업이 있을 때만 UI를 보여줌
+      if (isSheetScheduledToOpen) {
+        showSheetUI();
+        isSheetScheduledToOpen = false; // 실행 후 플래그 초기화
+      }
+    });
+    
+    // 키보드가 열리면 UX를 위해 시트를 닫음
+    detector.on('keyboardOpen', () => {
+      console.log('Event: keyboardOpen detected. Closing sheet.');
+      hideSheetUI();
+    });
+
+    // --- 각 버튼별 이벤트 핸들러 등록 ---
+
+    // [1. 키보드 대기 버튼]
+    waitButton.addEventListener('click', () => {
+      isSheetScheduledToOpen = true;
+
+      // 2. 키보드를 닫기 위해 입력창의 포커스를 해제합니다.
+      // 이것이 'keyboardClose' 이벤트를 트리거하는 계기가 됩니다.
+      input.blur();
+    });
+
+    // [2. 즉시 열기 버튼]
+    nowButton.addEventListener('click', () => {
+      console.log('[Now Button] Opening directly without waiting.');
+      // 키보드 상태와 관계없이 항상 즉시 UI를 보여줌
+
+      showSheetUI();
+    });
+
+
+    // --- 공통 이벤트 핸들러 ---
+    dim.addEventListener('click', hideSheetUI);
+    
+    // 감지기 시작 및 정리
+    detector.init();
+    window.addEventListener('beforeunload', () => {
+      detector.destroy();
+    });
+  </script>
+</body>
+</html>

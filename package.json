@@ -1,0 +1,22 @@
+{
+  "name": "virtual-keyboard-detecter",
+  "version": "1.0.0",
+  "description": "가상 키보드 감지기 샘플 및 개발 서버",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm run build && serve -l 8000 .",
+    "build": "tsc && cp index.html dist/index.html && sed -i '' 's/\\.\\/keyboard-detector/\\.\\/index.js/g' dist/index.html",
+    "build:watch": "tsc --watch",
+    "cap:sync": "npm run build && npx cap sync ios",
+    "cap:ios": "npm run cap:sync && npx cap open ios"
+  },
+  "devDependencies": {
+    "serve": "14.2.4",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@capacitor/core": "^5.0.0",
+    "@capacitor/cli": "^5.0.0",
+    "@capacitor/ios": "^5.0.0"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "keyboard-detecter",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["keyboard-detecter/**/*", "keyboard-detecter/index.ts", "keyboard-detecter/debounce.ts"],
+  "exclude": ["node_modules", "dist"]
+} 
