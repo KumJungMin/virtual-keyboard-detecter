@@ -44,7 +44,6 @@
   <script type="module">
     import { keyboardDetector } from './index.js';
     
-    // --- DOM 요소 ---
     const bottomSheet = document.getElementById('bottom-sheet');
     const waitButton = document.getElementById('open-sheet-wait-button');
     const nowButton = document.getElementById('open-sheet-now-button'); // 새 버튼
@@ -52,17 +51,13 @@
     const input = document.getElementById('input');
 
 
-    // --- 상태 플래그 ---
     let isSheetScheduledToOpen = false;
 
-    // --- UI 제어 함수 (리팩토링) ---
-    // 순수하게 UI를 보여주는 역할
     const showSheetUI = () => {
       bottomSheet.classList.add('up');
       dim.classList.add('show');
     };
 
-    // 순수하게 UI를 숨기는 역할
     const hideSheetUI = () => {
       bottomSheet.classList.remove('up');
       dim.classList.remove('show');

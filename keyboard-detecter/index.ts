@@ -1,8 +1,9 @@
 import { debounce } from './debounce.js';
 
 /**
- * 가상 키보드 감지 클래스.
- * 'keyboardOpen' 애니메이션 종료 후 발생하는 'keyboardClose' 커스텀 이벤트를 발생시킵니다.
+ * 프레임워크에 독립적인 가상 키보드 감지 클래스.
+ * 'keyboardOpen', 'keyboardClose', 그리고 애니메이션 종료 후 발생하는
+ * 'keyboardStableClose' 커스텀 이벤트를 발생시킵니다.
  */
 class KeyboardDetector {
   #listeners: { [key: string]: Function[] } = {};
@@ -21,7 +22,7 @@ class KeyboardDetector {
 
   /**
    * 이벤트 리스너를 등록합니다.
-   * @param {'keyboardOpen' | 'keyboardClose'} eventName
+   * @param {'keyboardOpen' | 'keyboardClose' | 'keyboardStableClose'} eventName
    * @param {function} listener
    */
   on(eventName: string | number, listener: any) {
@@ -62,8 +63,9 @@ class KeyboardDetector {
       if (isKeyboardNowOpen) {
         this.#emit('keyboardOpen');
       } else if (oldIsOpen) {
+        this.#emit('keyboardClose');
         this.#runWhenViewportStable(() => {
-          this.#emit('keyboardClose');
+          this.#emit('keyboardStableClose');
         });
       }
     }
